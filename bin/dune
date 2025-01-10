@@ -1,0 +1,4 @@
+(executable
+ (public_name device_api)
+ (name main)
+ (libraries device_api))

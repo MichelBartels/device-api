@@ -1,0 +1,96 @@
+open Ctypes
+
+type f32 = F32
+
+type i1 = I1
+
+type i64 = I64
+
+type u32 = U32
+
+type u64 = U64
+
+type f64 = F64
+
+type (_, _) kind =
+  | F32 : (f32, float) kind
+  | F64 : (f64, float) kind
+  | I1 : (i1, bool) kind
+  | I64 : (i64, Signed.Int64.t) kind
+  | U32 : (u32, Unsigned.uint32) kind
+  | U64 : (u64, Unsigned.uint64) kind
+
+let ctype_of_kind : type a b. (a, b) kind -> b typ = function
+  | F32 ->
+      float
+  | F64 ->
+      double
+  | I1 ->
+      bool
+  | I64 ->
+      int64_t
+  | U32 ->
+      uint32_t
+  | U64 ->
+      uint64_t
+
+type ('a, 'b) t = {kind: ('a, 'b) kind; data: 'b carray; shape: int list}
+
+let make kind shape data = {kind; data; shape}
+
+let of_list kind shape l =
+  let n = List.length l in
+  let data = CArray.make (ctype_of_kind kind) n in
+  List.iteri (fun i x -> CArray.set data i x) l ;
+  {kind; data; shape}
+
+let to_list t = CArray.to_list t.data
+
+let shape t = t.shape
+
+let size t = List.fold_left ( * ) 1 t.shape
+
+let kind t = t.kind
+
+let data t = CArray.start t.data
+
+let calc_index t = List.fold_left2 (fun acc i j -> (acc * i) + j) 0 t.shape
+
+let get t idx = CArray.get t.data @@ calc_index t idx
+
+let zero : type a b. (a, b) kind -> b = function
+  | F32 ->
+      0.0
+  | F64 ->
+      0.0
+  | I1 ->
+      false
+  | I64 ->
+      0L
+  | U32 ->
+      Unsigned.UInt32.zero
+  | U64 ->
+      Unsigned.UInt64.zero
+
+let one : type a b. (a, b) kind -> b = function
+  | F32 ->
+      1.0
+  | F64 ->
+      1.0
+  | I1 ->
+      true
+  | I64 ->
+      1L
+  | U32 ->
+      Unsigned.UInt32.one
+  | U64 ->
+      Unsigned.UInt64.one
+
+let full kind shape value =
+  let size = List.fold_left ( * ) 1 shape in
+  let data = CArray.make ?initial:(Some value) (ctype_of_kind kind) size in
+  {kind; data; shape}
+
+let ones kind shape = full kind shape @@ one kind
+
+let zeros kind shape = full kind shape @@ zero kind

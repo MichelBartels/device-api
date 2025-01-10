@@ -1,0 +1,4 @@
+(library
+ (name device_api)
+ (public_name device_api)
+ (libraries ctypes))
