@@ -94,3 +94,43 @@ let full kind shape value =
 let ones kind shape = full kind shape @@ one kind
 
 let zeros kind shape = full kind shape @@ zero kind
+
+let value_to_string : type a b. (a, b) kind -> b -> string =
+ fun kind v ->
+  match (kind, v) with
+  | F32, v ->
+      Printf.sprintf "%e" v
+  | F64, v ->
+      Printf.sprintf "%e" v
+  | I1, b ->
+      string_of_bool b
+  | I64, i ->
+      Signed.Int64.to_string i
+  | U32, i ->
+      Unsigned.UInt32.to_string i
+  | U64, i ->
+      Unsigned.UInt64.to_string i
+
+type 'a values = Tensor of 'a values Seq.t | Value of 'a
+
+let values t =
+  let shape = shape t in
+  let rec values' shape acc =
+    match shape with
+    | [] ->
+        Value (get t (List.rev acc))
+    | x :: xs ->
+        Tensor (Seq.init x (fun i -> values' xs (i :: acc)))
+  in
+  values' shape []
+
+let to_string t =
+  let rec values_to_string = function
+    | Tensor s ->
+        "["
+        ^ (Seq.map values_to_string s |> List.of_seq |> String.concat ", ")
+        ^ "]"
+    | Value v ->
+        value_to_string t.kind v
+  in
+  values_to_string (values t)
