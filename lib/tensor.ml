@@ -134,3 +134,7 @@ let to_string t =
         value_to_string t.kind v
   in
   values_to_string (values t)
+
+let scalar kind v = of_list kind [] [v]
+
+let scalar_f32 v = scalar F32 v
