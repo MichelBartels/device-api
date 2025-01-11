@@ -15,6 +15,8 @@ module type S = sig
     shape:int list -> ('a, 'b) Tensor.kind -> buffer -> ('a, 'b) Tensor.t
 
   val identifier : string
+
+  val collect_buffer : buffer -> unit
 end
 
 module Tensor = Tensor
