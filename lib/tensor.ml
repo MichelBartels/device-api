@@ -138,3 +138,18 @@ let to_string t =
 let scalar kind v = of_list kind [] [v]
 
 let scalar_f32 v = scalar F32 v
+
+let concatenate ts =
+  let kind = List.hd ts |> kind in
+  let shape = List.hd ts |> shape in
+  let size = List.fold_left ( * ) 1 shape in
+  let shape = List.length ts :: shape in
+  let total_size = size * List.length ts in
+  let data = CArray.make (ctype_of_kind kind) total_size in
+  List.iteri
+    (fun i t ->
+      for j = 0 to size - 1 do
+        CArray.set data ((i * size) + j) (CArray.get t.data j)
+      done )
+    ts ;
+  {kind; data; shape}
