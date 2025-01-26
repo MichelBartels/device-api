@@ -138,3 +138,19 @@ let to_string t =
 let scalar kind v = of_list kind [] [v]
 
 let scalar_f32 v = scalar F32 v
+
+let concatenate tensors =
+  let shape = shape @@ List.hd tensors in
+  let kind = kind @@ List.hd tensors in
+  let flat_size = List.fold_left ( * ) 1 shape in
+  let n = List.length tensors in
+  let data = CArray.make (ctype_of_kind @@ kind) (n * flat_size) in
+  List.iteri
+    (fun i t ->
+      let flat = t.data in
+      let flat_size = size t in
+      for j = 0 to flat_size - 1 do
+        CArray.set data ((i * flat_size) + j) (CArray.get flat j)
+      done )
+    tensors ;
+  {kind; data; shape= n :: shape}
