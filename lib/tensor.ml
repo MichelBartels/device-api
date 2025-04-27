@@ -40,6 +40,8 @@ let make kind shape data = {kind; data; shape}
 
 let of_list kind shape l =
   let n = List.length l in
+  let expected_size = List.fold_left ( * ) 1 shape in
+  if n <> expected_size then failwith "Tensor.of_list: size mismatch" ;
   let data = CArray.make (ctype_of_kind kind) n in
   List.iteri (fun i x -> CArray.set data i x) l ;
   {kind; data; shape}
