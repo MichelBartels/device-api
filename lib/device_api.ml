@@ -3,7 +3,7 @@ module type S = sig
 
   type buffer
 
-  val compile : program:string -> ?path:string -> program
+  val compile : ?path:string -> program:string -> program
 
   val tensor_to_buffer : ('a, 'b) Tensor.t -> buffer
 
