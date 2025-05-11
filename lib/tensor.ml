@@ -156,3 +156,12 @@ let concatenate tensors =
       done )
     tensors ;
   {kind; data; shape= n :: shape}
+
+
+let normal mean std shape =
+  let normal () =
+    let u1 = Random.float 1.0 in
+    let u2 = Random.float 1.0 in
+    sqrt (-2.0 *. log u1) *. cos (2.0 *. Float.pi *. u2) *. std +. mean in
+  let data = List.init (List.fold_left ( * ) 1 shape) (fun _ -> normal ()) in
+  of_list F32 shape data
