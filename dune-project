@@ -5,11 +5,11 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github MichelBartels/device-api))
 
-(authors "Author Name")
+(authors "Michel Bartels")
 
-(maintainers "Maintainer Name")
+(maintainers "Michel Bartels")
 
 (license LICENSE)
 
@@ -17,10 +17,4 @@
 
 (package
  (name device_api)
- (synopsis "A short synopsis")
- (description "A longer description")
- (depends ocaml dune)
- (tags
-  (topics "to describe" your project)))
-
-; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html
+ (depends ocaml dune ctypes))
