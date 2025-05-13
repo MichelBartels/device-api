@@ -40,6 +40,8 @@ let make kind shape data = {kind; data; shape}
 
 let of_list kind shape l =
   let n = List.length l in
+  let expected_size = List.fold_left ( * ) 1 shape in
+  if n <> expected_size then failwith "Tensor.of_list: size mismatch" ;
   let data = CArray.make (ctype_of_kind kind) n in
   List.iteri (fun i x -> CArray.set data i x) l ;
   {kind; data; shape}
@@ -139,17 +141,27 @@ let scalar kind v = of_list kind [] [v]
 
 let scalar_f32 v = scalar F32 v
 
-let concatenate ts =
-  let kind = List.hd ts |> kind in
-  let shape = List.hd ts |> shape in
-  let size = List.fold_left ( * ) 1 shape in
-  let shape = List.length ts :: shape in
-  let total_size = size * List.length ts in
-  let data = CArray.make (ctype_of_kind kind) total_size in
+let concatenate tensors =
+  let shape = shape @@ List.hd tensors in
+  let kind = kind @@ List.hd tensors in
+  let flat_size = List.fold_left ( * ) 1 shape in
+  let n = List.length tensors in
+  let data = CArray.make (ctype_of_kind @@ kind) (n * flat_size) in
   List.iteri
     (fun i t ->
-      for j = 0 to size - 1 do
-        CArray.set data ((i * size) + j) (CArray.get t.data j)
+      let flat = t.data in
+      let flat_size = size t in
+      for j = 0 to flat_size - 1 do
+        CArray.set data ((i * flat_size) + j) (CArray.get flat j)
       done )
-    ts ;
-  {kind; data; shape}
+    tensors ;
+  {kind; data; shape= n :: shape}
+
+
+let normal mean std shape =
+  let normal () =
+    let u1 = Random.float 1.0 in
+    let u2 = Random.float 1.0 in
+    sqrt (-2.0 *. log u1) *. cos (2.0 *. Float.pi *. u2) *. std +. mean in
+  let data = List.init (List.fold_left ( * ) 1 shape) (fun _ -> normal ()) in
+  of_list F32 shape data

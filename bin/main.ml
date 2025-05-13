@@ -1,9 +1,9 @@
 open Device_api
 
-let a = Tensor.ones F32 [2; 3; 4]
+let t1 = Tensor.of_list F32 [2; 2] [1.; 2.; 3.; 4.]
 
-let b = Tensor.zeros F32 [2; 3; 4]
+let t2 = Tensor.of_list F32 [2; 2] [5.; 6.; 7.; 8.]
 
-let c = Tensor.concatenate [a; b]
+let t3 = Tensor.concatenate [t1; t2]
 
-let () = Printf.printf "%s\n" (Tensor.to_string c)
+let () = print_endline @@ Tensor.to_string t3
