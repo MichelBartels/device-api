@@ -1,4 +1,4 @@
-= Device-API
+# Device-API
 To install this library, run the following command:
 
 ``` shell
